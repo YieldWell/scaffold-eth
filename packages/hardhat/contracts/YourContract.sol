@@ -38,10 +38,11 @@ contract YourContract is ERC721, ERC721URIStorage, Pausable, Ownable {
 
   //mapping(uint256 => string) public poolNames;
   string[] public poolNames;
+  uint32 public poolCount;
 
   event SetPurpose(address sender, string purpose);
 
-  string public purpose = "Building Unstoppable Apps";
+  string public purpose = "Yield farmers helping real farmers";
 
   error EmptyPurposeError(uint code, string message);
 
@@ -70,6 +71,7 @@ contract YourContract is ERC721, ERC721URIStorage, Pausable, Ownable {
     // when a map: poolNames[newTokenId] = name;
     // TODO set an approved Strat
     poolNames.push(name);
+    poolCount++;
     _tokenIdCounter.increment();
   }
   function depositPool(uint256 poolId) public payable {

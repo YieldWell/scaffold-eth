@@ -19,6 +19,24 @@ export default function ExampleUI({
   writeContracts,
 }) {
   const [newPurpose, setNewPurpose] = useState("loading...");
+  const [newPoolName, setNewPoolName] = useState("loading...");
+  const [newDepositPool, setNewDepositPool] = useState("loading...");
+  const [newDepositPoolId, setNewDepositPoolId] = useState(0);
+  const [newDepositAmount, setNewDepositAmount] = useState(0);
+  const [poolNames, setPoolNames] = useState("load me manually...");
+  const [newStrategy, setNewStrategy] = useState("loading...");
+
+  const poolMintCost = 420; // TODO
+
+  const fetchPools = async () => {
+    let newPoolNames = [];
+    const poolCount = await readContracts["YourContract"].poolCount();
+    for (let i = 0; i < poolCount; i++) {
+      const name = await readContracts["YourContract"].poolNames(i);
+      newPoolNames.push(name);
+    }
+    setPoolNames(newPoolNames);
+  };
 
   return (
     <div>
@@ -26,42 +44,80 @@ export default function ExampleUI({
         ⚙️ Here is an example UI that displays and sets the purpose in your smart contract:
       */}
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
-        <h2>Example UI:</h2>
+        <h2>YieldWell UI:</h2>
         <h4>purpose: {purpose}</h4>
         <Divider />
-        <div style={{ margin: 8 }}>
-          <Input
-            onChange={e => {
-              setNewPurpose(e.target.value);
-            }}
-          />
-          <Button
-            style={{ marginTop: 8 }}
-            onClick={async () => {
-              /* look how you call setPurpose on your contract: */
-              /* notice how you pass a call back for tx updates too */
-              const result = tx(writeContracts.YourContract.setPurpose(newPurpose), update => {
-                console.log("📡 Transaction Update:", update);
-                if (update && (update.status === "confirmed" || update.status === 1)) {
-                  console.log(" 🍾 Transaction " + update.hash + " finished!");
-                  console.log(
-                    " ⛽️ " +
-                      update.gasUsed +
-                      "/" +
-                      (update.gasLimit || update.gas) +
-                      " @ " +
-                      parseFloat(update.gasPrice) / 1000000000 +
-                      " gwei",
-                  );
-                }
-              });
-              console.log("awaiting metamask/web3 confirm result...", result);
-              console.log(await result);
-            }}
-          >
-            Set Purpose!
-          </Button>
-        </div>
+        Pool name: <Input
+          onChange={e => {
+            setNewDepositPool(e.target.value);
+          }}
+        />
+        Deposit amount: <Input
+          onChange={e => {
+            setNewDepositAmount(e.target.value);
+          }}
+        />
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            let depositPoolId = 0; // TODO convert input pool name to id based on fetched poolNames
+            const result = tx(writeContracts.YourContract.depositPool(depositPoolId, { value: parseInt(newDepositAmount) }), update => {
+              console.log("📡 Transaction Update:", update);
+              if (update && (update.status === "confirmed" || update.status === 1)) {
+                console.log(" 🍾 Transaction " + update.hash + " finished!");
+                console.log(" ⛽️ " + update.gasUsed + "/" + (update.gasLimit || update.gas) + " @ " + parseFloat(update.gasPrice) / 1000000000 + " gwei",);
+              }
+            });
+            console.log("awaiting metamask/web3 confirm result...", result);
+            console.log(await result);
+          }}
+        >
+          Deposit {newDepositAmount} to named pool with id {newDepositPoolId}!
+        </Button>
+        <Divider />
+        <Input
+          onChange={e => {
+            setNewPoolName(e.target.value);
+          }}
+        />
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            const result = tx(writeContracts.YourContract.createPool(newPoolName, { value: poolMintCost }), update => {
+              console.log("📡 Transaction Update:", update);
+              if (update && (update.status === "confirmed" || update.status === 1)) {
+                console.log(" 🍾 Transaction " + update.hash + " finished!");
+                console.log(" ⛽️ " + update.gasUsed + "/" + (update.gasLimit || update.gas) + " @ " + parseFloat(update.gasPrice) / 1000000000 + " gwei",);
+              }
+            });
+            console.log("awaiting metamask/web3 confirm result...", result);
+            console.log(await result);
+          }}
+        >
+          Spend {poolMintCost} to create a new named pool!
+        </Button>
+        <Divider />
+        {JSON.stringify(poolNames)}
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={fetchPools}
+        >
+          load pools
+        </Button>
+        <Divider />
+        <Input
+          onChange={e => {
+            setNewStrategy(e.target.value);
+          }}
+        />
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            console.log("do something as deployer with set contract address, also name");
+          }}
+        >
+          Approve strategy [only deployer]
+        </Button>
         <Divider />
         Your Address:
         <Address address={address} ensProvider={mainnetProvider} fontSize={16} />
@@ -78,8 +134,10 @@ export default function ExampleUI({
         <div>OR</div>
         <Balance address={address} provider={localProvider} price={price} />
         <Divider />
+        {false ? <div>
         <div>🐳 Example Whale Balance:</div>
         <Balance balance={utils.parseEther("1000")} provider={localProvider} price={price} />
+        </div> : ''}
         <Divider />
         {/* use utils.formatEther to display a BigNumber: */}
         <h2>Your Balance: {yourLocalBalance ? utils.formatEther(yourLocalBalance) : "..."}</h2>
@@ -91,6 +149,7 @@ export default function ExampleUI({
           fontSize={16}
         />
         <Divider />
+        {false ? <div>
         <div style={{ margin: 8 }}>
           <Button
             onClick={() => {
@@ -150,6 +209,7 @@ export default function ExampleUI({
             Another Example
           </Button>
         </div>
+        </div> : ''}
       </div>
 
       {/*
