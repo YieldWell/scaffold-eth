@@ -160,6 +160,7 @@ function App(props) {
 
   // 📟 Listen for broadcast events
   const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  const createPoolEvents = useEventListener(readContracts, "YourContract", "CreatePool", localProvider, 1);
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -408,6 +409,7 @@ function App(props) {
               readContracts={readContracts}
               purpose={purpose}
               setPurposeEvents={setPurposeEvents}
+              createPoolEvents={createPoolEvents}
             />
           </Route>
           <Route path="/mainnetdai">

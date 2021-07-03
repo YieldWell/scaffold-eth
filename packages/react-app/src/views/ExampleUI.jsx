@@ -9,6 +9,7 @@ import { Address, Balance } from "../components";
 export default function ExampleUI({
   purpose,
   setPurposeEvents,
+  createPoolEvents,
   address,
   mainnetProvider,
   localProvider,
@@ -31,6 +32,7 @@ export default function ExampleUI({
   const fetchPools = async () => {
     let newPoolNames = [];
     const poolCount = await readContracts["YourContract"].poolCount();
+    console.log(poolCount);
     for (let i = 0; i < poolCount; i++) {
       const name = await readContracts["YourContract"].poolNames(i);
       newPoolNames.push(name);
@@ -217,7 +219,20 @@ export default function ExampleUI({
           (uncomment the event and emit line in YourContract.sol! )
       */}
       <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-        <h2>Events:</h2>
+        <h2>Pool Events:</h2>
+        <List
+          bordered
+          dataSource={createPoolEvents}
+          renderItem={item => {
+            return (
+              <List.Item key={item.blockNumber + "_" + item.sender + "_" + item.purpose}>
+                <Address address={item[0]} ensProvider={mainnetProvider} fontSize={16} />
+                {item[1]}
+              </List.Item>
+            );
+          }}
+        />
+        <h2>Purpose Events:</h2>
         <List
           bordered
           dataSource={setPurposeEvents}

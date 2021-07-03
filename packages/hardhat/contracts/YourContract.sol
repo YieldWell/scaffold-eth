@@ -41,6 +41,7 @@ contract YourContract is ERC721, ERC721URIStorage, Pausable, Ownable {
   uint32 public poolCount;
 
   event SetPurpose(address sender, string purpose);
+  event CreatePool(address sender, string name);
 
   string public purpose = "Yield farmers helping real farmers";
 
@@ -73,6 +74,7 @@ contract YourContract is ERC721, ERC721URIStorage, Pausable, Ownable {
     poolNames.push(name);
     poolCount++;
     _tokenIdCounter.increment();
+    emit CreatePool(msg.sender, name);
   }
   function depositPool(uint256 poolId) public payable {
     require(poolId < _tokenIdCounter.current());
